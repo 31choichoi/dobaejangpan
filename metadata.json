@@ -1,0 +1,6 @@
+{
+  "name": "도배장판닷컴",
+  "description": "대한민국 대표 도배 및 장판 프리미엄 책임시공 전문 브랜드. 실시간 자동 시공 견적 계산기 및 AI 스타일 컨설팅 서비스 제공.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
