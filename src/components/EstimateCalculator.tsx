@@ -46,20 +46,30 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
     // Discrete Labor units (품수) according to realistic construction standards
     let smoothDobae = 0;
     if (wallpaper === "silk") {
-      smoothDobae = 1.5 + (size * 0.15);
+      // 18평 -> 4품, 24평 -> 6품
+      // Equation: size / 3 - 2
+      smoothDobae = (size / 3) - 2;
+      if (smoothDobae < 2.0) smoothDobae = 2.0; // Minimum 2 experts for silk wallpaper
     } else if (wallpaper === "paper") {
-      smoothDobae = 0.8 + (size * 0.10);
+      // 18평 -> 2.5품, 24평 -> 3.3품
+      smoothDobae = (size * 0.14) + 0.5;
+      if (smoothDobae < 1.0) smoothDobae = 1.0;
     }
 
     let smoothFlooring = 0;
     if (flooring !== "none") {
-      smoothFlooring = 0.5 + (size * 0.06);
+      // Flooring labor (continuous curves to avoid jumps, e.g., 14-15평 -> 1품, 25-26평 -> 2품)
+      smoothFlooring = 0.4 + (size * 0.05);
+      if (smoothFlooring < 1.0) smoothFlooring = 1.0;
     }
 
-    const dobaeWorkers = smoothDobae > 0 ? Math.max(1, Math.round(smoothDobae)) : 0;
-    const flooringWorkers = smoothFlooring > 0 ? Math.max(1, Math.round(smoothFlooring)) : 0;
+    const dobaeWorkers = smoothDobae > 0 ? Math.round(smoothDobae) : 0;
+    const flooringWorkers = smoothFlooring > 0 ? Math.round(smoothFlooring) : 0;
 
-    const DAILY_LABOR_RATE = 280000; // 280k KRW per expert (May 2026 market average)
+    // 인건비 29만원 + 식대 9천원 = 1품당 총 299,000원 기준 산정
+    const BASE_LABOR_RATE = 290000;
+    const MEAL_RATE = 9000;
+    const DAILY_LABOR_RATE = BASE_LABOR_RATE + MEAL_RATE; // 299,000 KRW (May 2026 market standards)
     
     // Smooth labor pricing based on continuous curve to eliminate sudden cliff-jumps
     const laborCost = Math.round((smoothDobae + smoothFlooring) * DAILY_LABOR_RATE);
@@ -235,90 +245,101 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
 
             <div className="space-y-6">
               
-              {/* Space Type */}
+              {/* Construction Size (Pyeong Presets) */}
               <div>
-                <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-2">
-                  1. 시공 대상 공간 유형
-                </label>
-                <div className="grid grid-cols-3 gap-2.5">
-                  {["아파트", "빌라/원룸", "상가/사무실"].map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      id={`calc-space-${type}`}
-                      onClick={() => setSpaceType(type)}
-                      className={`py-3 px-1.5 text-xs sm:text-sm font-bold rounded-xl border text-center transition-all ${
-                        spaceType === type 
-                          ? "bg-indigo-600 text-white border-indigo-600 shadow-sm" 
-                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Construction Size (Pyeong) */}
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-1">
-                    <span>2. 시공 전체 실제 면적 (실평수 / 전용면적 기준)</span>
-                    <span className="bg-rose-100 text-rose-700 text-[10px] px-1.5 py-0.5 rounded-sm font-extrabold animate-pulse">실평수 필수 입력!</span>
+                <div className="flex justify-between items-center mb-3">
+                  <label className="text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                    <span className="text-indigo-600 font-extrabold text-base font-sans">01</span>
+                    <span className="font-sans font-black text-slate-900 text-sm sm:text-base">분양 평수 선택</span>
                   </label>
-                  <span className="bg-indigo-50 text-indigo-700 font-sans font-black text-sm px-3 py-1 rounded-lg border border-indigo-100">
-                    실 {size} 평 <span className="text-xs text-slate-400 font-normal">({(size * 3.3).toFixed(1)} m²)</span>
+                  <span className="bg-indigo-50 text-indigo-700 font-sans font-black text-xs sm:text-sm px-3 py-1 rounded-lg border border-indigo-100">
+                    실제 거주 {size}평 기준 <span className="text-xs text-slate-400 font-normal">({(size * 3.3).toFixed(1)} m²)</span>
                   </span>
                 </div>
-                
-                {/* Visual guidance box */}
-                <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 mb-3 text-[11px] sm:text-xs text-slate-600 leading-relaxed">
-                  <p className="font-bold text-indigo-900 mb-1 flex items-center gap-1">
-                    💡 분양평수(공급면적)가 아닌, 실제 거주하시는 <strong>'실평수(전용면적)'</strong>를 입력하셔야 가견적이 완벽하게 일치합니다!
-                  </p>
-                  <p className="text-slate-500">
-                    · 아파트 <strong>32평형 또는 34평형</strong> (공급면적) ➔ 실제 거주는 보통 <strong>실평수 24~25평</strong>으로 지정<br />
-                    · 아파트 <strong>24평형 또는 25평형</strong> (공급면적) ➔ 실제 거주는 보통 <strong>실평수 18평</strong>으로 지정
-                  </p>
+
+                <div className="flex flex-row w-full gap-2 overflow-x-auto pb-3 pt-1 scrollbar-none sm:grid sm:grid-cols-6 sm:overflow-x-visible" id="preset-size-row">
+                  {[
+                    { supply: 19, real: 15, label: "19평", subLabel: "전용 15평" },
+                    { supply: 24, real: 18, label: "24평", subLabel: "전용 18평" },
+                    { supply: 32, real: 24, label: "32평", subLabel: "전용 24평" },
+                    { supply: 34, real: 26, label: "34평", subLabel: "전용 26평" },
+                    { supply: 45, real: 35, label: "45평", subLabel: "전용 35평" },
+                    { supply: 54, real: 43, label: "54평", subLabel: "전용 43평" },
+                  ].map((preset) => {
+                    const isSelected = size === preset.real;
+                    return (
+                      <button
+                        key={preset.supply}
+                        type="button"
+                        onClick={() => setSize(preset.real)}
+                        className={`flex-1 min-w-[70px] sm:min-w-0 py-3 px-1 text-center rounded-xl border transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-slate-900 border-slate-900 text-white shadow-md scale-[1.02]"
+                            : "bg-white border-slate-200 hover:bg-slate-50 text-slate-800"
+                        }`}
+                      >
+                        <span className="block font-sans font-black text-sm sm:text-base tracking-tight">
+                          {preset.label}
+                        </span>
+                        <span className={`block text-[10px] mt-1 font-medium ${
+                          isSelected ? "text-amber-400 font-semibold" : "text-slate-400"
+                        }`}>
+                          {preset.subLabel}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <input
-                  type="range"
-                  min="5"
-                  max="65"
-                  step="1"
-                  value={size}
-                  onChange={(e) => setSize(Number(e.target.value))}
-                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-                  id="calc-range-size"
-                />
-                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-medium px-1 mt-1">
-                  <span>실 5평(원룸)</span>
-                  <span>실 18평(공급 24평형)</span>
-                  <span>실 24평(공급 32평형)</span>
-                  <span>실 34평(공급 45평형)</span>
-                  <span>실 45평(공급 55평형)</span>
-                  <span>실 65평+</span>
+                {/* Detailed Size Adjustment Slider */}
+                <div className="mt-4 bg-slate-100/80 rounded-xl p-4 border border-slate-200/60" id="detailed-range-container">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+                      <span>📏 상세 실평수(전용면적) 직접 조절</span>
+                    </span>
+                    <span className="text-[11px] font-bold text-indigo-600 bg-white px-2.5 py-1 rounded-md shadow-sm border border-slate-200/50">
+                      실평수: <strong className="font-sans font-extrabold text-xs">{size}</strong>평
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="65"
+                    step="1"
+                    value={size}
+                    onChange={(e) => setSize(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    id="calc-range-size"
+                  />
+                  <div className="flex justify-between text-[10px] text-slate-400 font-medium px-1 mt-1.5">
+                    <span>실 5평</span>
+                    <span>실 15평</span>
+                    <span>실 24평</span>
+                    <span>실 35평</span>
+                    <span>실 45평</span>
+                    <span>실 65평+</span>
+                  </div>
                 </div>
               </div>
 
               {/* Wallpaper Choice */}
               <div>
-                <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-2">
-                  3. 벽 도배 자재 선택 (실크벽지 대폭 vs 합지)
+                <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-2.5 flex items-center gap-1.5">
+                  <span className="text-indigo-600 font-extrabold text-base font-sans">02</span>
+                  <span className="font-sans font-black text-slate-900 text-sm sm:text-base">벽 도배 자재 선택</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2.5">
                   {[
                     { id: "none", label: "도배 미시공", price: "0원/평" },
-                    { id: "paper", label: "친환경 합지 도배", price: "16,000원/평" },
-                    { id: "silk", label: "실크 벽지 도배", price: "29,000원/평" },
+                    { id: "paper", label: "친환경 합지 도배", price: "19,000원/평" },
+                    { id: "silk", label: "실크 벽지 도배", price: "34,000원/평" },
                   ].map((wall) => (
                     <button
                       key={wall.id}
                       type="button"
                       id={`calc-wall-${wall.id}`}
                       onClick={() => setWallpaper(wall.id)}
-                      className={`p-3 text-center rounded-xl border transition-all ${
+                      className={`p-3 text-center rounded-xl border transition-all cursor-pointer ${
                         wallpaper === wall.id 
                           ? "bg-indigo-600 text-white border-indigo-600 shadow-sm" 
                           : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
@@ -335,22 +356,23 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
 
               {/* Flooring Choice */}
               <div>
-                <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-2">
-                  4. 바닥 장판 라이프라인 자재 선택
+                <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-2.5 flex items-center gap-1.5">
+                  <span className="text-indigo-600 font-extrabold text-base font-sans">03</span>
+                  <span className="font-sans font-black text-slate-900 text-sm sm:text-base">바닥재 자재 선택</span>
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { id: "none", label: "바닥재 미시공", price: "0원/평" },
-                    { id: "basic", label: "1.8mm 실속 장판", price: "20,000원/평" },
-                    { id: "thick", label: "프리미엄 2.2mm", price: "33,000원/평" },
-                    { id: "decotile", label: "명품 데코타일", price: "38,000원/평" },
+                    { id: "basic", label: "1.8mm 실속 장판", price: "24,000원/평" },
+                    { id: "thick", label: "프리미엄 2.2mm", price: "38,000원/평" },
+                    { id: "decotile", label: "명품 데코타일", price: "44,000원/평" },
                   ].map((floor) => (
                     <button
                       key={floor.id}
                       type="button"
                       id={`calc-floor-${floor.id}`}
                       onClick={() => setFlooring(floor.id)}
-                      className={`p-2.5 text-center rounded-xl border transition-all ${
+                      className={`p-2.5 text-center rounded-xl border transition-all cursor-pointer ${
                         flooring === floor.id 
                           ? "bg-indigo-600 text-white border-indigo-600 shadow-sm" 
                           : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
