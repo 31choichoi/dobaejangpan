@@ -96,6 +96,8 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
     setIsSubmitting(true);
     setSubmitMessage(null);
 
+    const calcMessage = `[즉시 자동 견적 계산기] 예약 신청! 선택유형: ${spaceType} (${size}평) / 도배: ${wallpaper === 'silk' ? '실크벽지' : wallpaper === 'paper' ? '합지벽지' : '선택없음'} / 장판: ${flooring === 'thick' ? '프리미엄 장판' : flooring === 'basic' ? '실속장판' : flooring === 'decotile' ? '데코타일' : '선택없음'}. 자동 산출된 총가견적: 약 ${estimates.grandTotal.toLocaleString()}원 입니다.`;
+
     const payload = {
       name,
       phone,
@@ -103,8 +105,24 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
       size,
       wallpaper,
       flooring,
-      message: `[즉시 자동 견적 계산기] 예약 신청! 선택유형: ${spaceType} (${size}평) / 도배: ${wallpaper === 'silk' ? '실크벽지' : wallpaper === 'paper' ? '합지벽지' : '선택없음'} / 장판: ${flooring === 'thick' ? '프리미엄 장판' : flooring === 'basic' ? '실속장판' : flooring === 'decotile' ? '데코타일' : '선택없음'}. 자동 산출된 총가견적: 약 ${estimates.grandTotal.toLocaleString()}원 입니다.`,
-      source: "도배장판닷컴 실시간 자동 견적 계산기 양식 (Direct Client Browser)"
+      message: calcMessage,
+      source: "도배장판닷컴 실시간 자동 견적 계산기 양식 (Direct Client Browser)",
+
+      // Korean Field Mappings for Make.com Scenario
+      "이름": name,
+      "고객명": name,
+      "연락처": phone,
+      "전화번호": phone,
+      "공간유형": spaceType,
+      "공간": spaceType,
+      "평수": `${size}평`,
+      "면적": `${size}평`,
+      "도배유형": wallpaper === 'silk' ? '실크벽지 (친환경 코팅막, 이음새 맞춤 시공, 변색 없음, 고급 질감)' : '소형/합폭 합지벽지 (경제적이고 친환경적인 천연 펄프 종이벽지)',
+      "장판유형": flooring === 'thick' ? '2.2mm ~ 3.2mm 프리미엄 장판 (두툼하여 층간소음 감소, 쿠션감, 보행성 극대화)' : flooring === 'decotile' ? '데코타일 (내스크래치, 강화 마루 대비 저렴하며 변형 없는 조각 타일)' : '1.8mm 실속 실용 장판 (원룸 및 임대용 최고 인기 모델)',
+      "메시지": calcMessage,
+      "문의사항": calcMessage,
+      "요청사항": calcMessage,
+      "출처": "도배장판닷컴 실시간 자동 견적 계산기 양식"
     };
 
     // Direct, highly resilient post-forwarding to Make.com Webhook directly from browser
@@ -112,9 +130,9 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
       fetch("https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        mode: "no-cors",
         body: JSON.stringify(payload)
-      }).catch((e) => console.warn("[Make.com Webhook Calculator Client-Side Bypass]:", e));
+      }).then(r => console.log("[Make.com Webhook Calculator Client Success]:", r.status))
+        .catch((e) => console.warn("[Make.com Webhook Calculator Client-Side Bypass]:", e));
     } catch (e) {
       console.warn("[Make.com Webhook Calculator Client-Side Error Bypass]:", e);
     }

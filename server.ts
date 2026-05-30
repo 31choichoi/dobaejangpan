@@ -95,45 +95,75 @@ async function startServer() {
     };
     inquiries.unshift(newInquiry);
 
-    // Forward asynchronously to Make.com Webhook using native resilient https request
-    try {
-      const webhookUrl = "https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml";
-      const payload = JSON.stringify(newInquiry);
-      const reqUrl = new URL(webhookUrl);
-      
-      const options = {
-        hostname: reqUrl.hostname,
-        path: reqUrl.pathname + reqUrl.search,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(payload)
-        },
-        timeout: 10000 // 10s timeout
-      };
+    // Forward asynchronously to Make.com Webhook with hybrid bilingual payload
+    const webhookPayload = {
+      id: newInquiry.id,
+      name,
+      phone,
+      spaceType: spaceType || "아파트",
+      size: Number(size) || 18,
+      wallpaper: wallpaper || "silk",
+      flooring: flooring || "basic",
+      message: newInquiry.message,
+      createdAt: newInquiry.createdAt,
+      source: "도배장판닷컴 실시간 접수 (Backend)",
 
-      const webhookReq = https.request(options, (response) => {
-        let responseBody = "";
-        response.on("data", (chunk) => { responseBody += chunk; });
-        response.on("end", () => {
-          console.log(`[Make.com Webhook] Forwarded inquiry successfully. Status: ${response.statusCode}`);
+      // Korean Field Mappings for Make.com Scenario
+      "이름": name,
+      "고객명": name,
+      "연락처": phone,
+      "전화번호": phone,
+      "공간유형": spaceType || "아파트",
+      "공간": spaceType || "아파트",
+      "평수": `${size || 18}평`,
+      "면적": `${size || 18}평`,
+      "도배유형": (wallpaper === 'silk') ? '실크벽지 (친환경 코팅막, 이음새 맞춤 시공, 변색 없음, 고급 질감)' : (wallpaper === 'paper' ? '소형/합폭 합지벽지 (경제적이고 친환경적인 천연 펄프 종이벽지)' : '선택없음'),
+      "장판유형": (flooring === 'thick') ? '2.2mm ~ 3.2mm 프리미엄 장판 (두툼하여 층간소음 감소, 쿠션감, 보행성 극대화)' : (flooring === 'decotile' ? '데코타일 (내스크래치, 강화 마루 대비 저렴하며 변형 없는 조각 타일)' : (flooring === 'basic' ? '1.8mm 실속 실용 장판 (원룸 및 임대용 최고 인기 모델)' : '선택없음')),
+      "메시지": newInquiry.message,
+      "문의사항": newInquiry.message,
+      "요청사항": newInquiry.message,
+      "접수일자": newInquiry.createdAt,
+      "상태": "견적 대기",
+      "출처": "도배장판닷컴 Backend 서버"
+    };
+
+    const webhookUrl = "https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml";
+    
+    // Asynchronous dispatch using modern global fetch
+    globalThis.fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(webhookPayload)
+    })
+    .then((response) => {
+      console.log(`[Make.com Webhook Backend] Forwarded successfully. Status: ${response.status}`);
+    })
+    .catch((err) => {
+      console.error("[Make.com Webhook Backend] Native fetch failed, attempting legacy fallback...", err.message);
+      // Legacy https fallback
+      try {
+        const payloadStr = JSON.stringify(webhookPayload);
+        const reqUrl = new URL(webhookUrl);
+        const options = {
+          hostname: reqUrl.hostname,
+          path: reqUrl.pathname + reqUrl.search,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(payloadStr)
+          },
+          timeout: 8000
+        };
+        const req = https.request(options, (res) => {
+          console.log(`[Make.com Webhook Legacy Fallback] Status: ${res.statusCode}`);
         });
-      });
-
-      webhookReq.on("error", (err) => {
-        console.error("[Make.com Webhook] Forwarding failed with request error:", err.message);
-      });
-
-      webhookReq.on("timeout", () => {
-        console.error("[Make.com Webhook] Request timed out");
-        webhookReq.destroy();
-      });
-
-      webhookReq.write(payload);
-      webhookReq.end();
-    } catch (err: any) {
-      console.error("[Make.com Webhook] Critical invocation error:", err.message);
-    }
+        req.on("error", (e) => console.error("[Make.com Webhook Legacy Fallback Error]:", e.message));
+        req.write(payloadStr);
+        req.end();
+      } catch (fallbackErr: any) {
+        console.error("[Make.com Webhook Legacy Fallback Critical]:", fallbackErr.message);
+      }
+    });
 
     res.status(201).json(newInquiry);
   });

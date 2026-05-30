@@ -43,16 +43,32 @@ export default function InquiryForm({ inquiries, onInquiryAdded }: InquiryFormPr
       wallpaper,
       flooring,
       message: message.trim() || "전체 도배 장판 평수 가격 단가 무료 실측 및 견적 문의드립니다.",
-      source: "도배장판닷컴 실시간 간편 상담신청 양식 (Direct Client Browser)"
+      source: "도배장판닷컴 실시간 간편 상담신청 양식 (Direct Client Browser)",
+
+      // Korean Field Mappings for Make.com Scenario
+      "이름": name,
+      "고객명": name,
+      "연락처": phone,
+      "전화번호": phone,
+      "공간유형": spaceType,
+      "공간": spaceType,
+      "평수": `${size}평`,
+      "면적": `${size}평`,
+      "도배유형": wallpaper === 'silk' ? '실크벽지 (친환경 코팅막, 이음새 맞춤 시공, 변색 없음, 고급 질감)' : '소형/합폭 합지벽지 (경제적이고 친환경적인 천연 펄프 종이벽지)',
+      "장판유형": flooring === 'thick' ? '2.2mm ~ 3.2mm 프리미엄 장판 (두툼하여 층간소음 감소, 쿠션감, 보행성 극대화)' : flooring === 'decotile' ? '데코타일 (내스크래치, 강화 마루 대비 저렴하며 변형 없는 조각 타일)' : '1.8mm 실속 실용 장판 (원룸 및 임대용 최고 인기 모델)',
+      "메시지": message.trim() || "전체 도배 장판 평수 가격 단가 무료 실측 및 견적 문의드립니다.",
+      "문의사항": message.trim() || "전체 도배 장판 평수 가격 단가 무료 실측 및 견적 문의드립니다.",
+      "요청사항": message.trim() || "전체 도배 장판 평수 가격 단가 무료 실측 및 견적 문의드립니다.",
+      "출처": "도배장판닷컴 실시간 간편 상담신청 양식"
     };
 
     try {
       fetch("https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        mode: "no-cors",
         body: JSON.stringify(clientPayload)
-      }).catch((e) => console.warn("[Make.com Webhook Client-Side Bypass]:", e));
+      }).then(r => console.log("[Make.com Webhook Client-Side Success]:", r.status))
+        .catch((e) => console.warn("[Make.com Webhook Client-Side Bypass]:", e));
     } catch (e) {
       console.warn("[Make.com Webhook Client-Side Error Bypass]:", e);
     }
