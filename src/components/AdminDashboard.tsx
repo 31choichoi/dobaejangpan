@@ -23,12 +23,11 @@ export default function AdminDashboard({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Use part of registration number "1204" as default demo passcode
-    if (passcode === "1204" || passcode === "admin") {
+    if (passcode === "1000") {
       setIsAuthenticated(true);
       setLoginError("");
     } else {
-      setLoginError("올바른 관리자 패스코드를 입력해 주십시오. (기본 패스코드: 1204)");
+      setLoginError("올바른 관리자 비밀번호를 입력해 주십시오.");
     }
   };
 
@@ -81,7 +80,7 @@ export default function AdminDashboard({
               <label className="block text-xs font-bold text-slate-700 mb-1">관리자 엑세스 비밀번호</label>
               <input
                 type="password"
-                placeholder="비밀번호를 입력해주십시오. (초기값: 1204)"
+                placeholder="비밀번호를 입력해주십시오."
                 value={passcode}
                 onChange={(e) => {
                   setPasscode(e.target.value);
