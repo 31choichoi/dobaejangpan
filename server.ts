@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import https from "https";
 
 // Lazy-loaded Gemini AI client to avoid crashes if API key is not present on start
 let aiClient: GoogleGenAI | null = null;
@@ -94,16 +95,45 @@ async function startServer() {
     };
     inquiries.unshift(newInquiry);
 
-    // Forward asynchronously to Make.com Webhook
-    fetch("https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newInquiry)
-    }).then((response) => {
-      console.log(`[Make.com Webhook] Forwarded inquiry successfully. Status: ${response.status}`);
-    }).catch((err) => {
-      console.error("[Make.com Webhook] Forwarding failed:", err.message);
-    });
+    // Forward asynchronously to Make.com Webhook using native resilient https request
+    try {
+      const webhookUrl = "https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml";
+      const payload = JSON.stringify(newInquiry);
+      const reqUrl = new URL(webhookUrl);
+      
+      const options = {
+        hostname: reqUrl.hostname,
+        path: reqUrl.pathname + reqUrl.search,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload)
+        },
+        timeout: 10000 // 10s timeout
+      };
+
+      const webhookReq = https.request(options, (response) => {
+        let responseBody = "";
+        response.on("data", (chunk) => { responseBody += chunk; });
+        response.on("end", () => {
+          console.log(`[Make.com Webhook] Forwarded inquiry successfully. Status: ${response.statusCode}`);
+        });
+      });
+
+      webhookReq.on("error", (err) => {
+        console.error("[Make.com Webhook] Forwarding failed with request error:", err.message);
+      });
+
+      webhookReq.on("timeout", () => {
+        console.error("[Make.com Webhook] Request timed out");
+        webhookReq.destroy();
+      });
+
+      webhookReq.write(payload);
+      webhookReq.end();
+    } catch (err: any) {
+      console.error("[Make.com Webhook] Critical invocation error:", err.message);
+    }
 
     res.status(201).json(newInquiry);
   });

@@ -8,12 +8,13 @@ interface NavigationProps {
 
 export default function Navigation({ activeTab, setActiveTab }: NavigationProps) {
   const menuItems = [
-    { id: "calculator", label: "실시간 견적" },
+    { id: "calculator", label: "도배장판견적" },
     { id: "wallpaper", label: "도배정보" },
     { id: "flooring", label: "장판정보" },
-    { id: "ai-consult", label: "AI 맞춤 스타일 컨설팅" },
-    { id: "contact", label: "실시간 상담 문의" },
+    { id: "reviews", label: "시공후기" },
+    { id: "ai-consult", label: "AI 스타일" },
     { id: "home", label: "이용안내" },
+    { id: "contact", label: "상담신청" },
   ];
 
   return (
@@ -52,21 +53,26 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
           </div>
 
           {/* Navigation Links for Desk */}
-          <nav className="hidden lg:flex space-x-1" id="desktop-nav-menu">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                id={`btn-nav-${item.id}`}
-                onClick={() => setActiveTab(item.id)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 cursor-pointer ${
-                  activeTab === item.id 
-                    ? "text-indigo-600 bg-indigo-50/50" 
-                    : "text-slate-600 hover:text-indigo-600 hover:bg-slate-50"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+          <nav className="hidden lg:flex items-center space-x-1.5" id="desktop-nav-menu">
+            {menuItems.map((item) => {
+              const isContactBtn = item.id === "contact";
+              return (
+                <button
+                  key={item.id}
+                  id={`btn-nav-${item.id}`}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`px-3.5 py-2 bg-transparent rounded-lg text-base font-extrabold transition-all duration-200 cursor-pointer ${
+                    isContactBtn
+                      ? "bg-amber-400 hover:bg-amber-500 text-slate-950 font-black shadow-xs px-5 py-2 border border-amber-500/30 ml-2 animate-bounce-subtle"
+                      : activeTab === item.id 
+                        ? "text-indigo-600 bg-indigo-50/80" 
+                        : "text-slate-700 hover:text-indigo-600 hover:bg-slate-100/90"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Quick Call Action Button */}
@@ -86,20 +92,25 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
       {/* Mobile navigation scroll area */}
       <div className="lg:hidden border-t border-slate-100 bg-slate-50/80 overflow-x-auto whitespace-nowrap scrollbar-none scroll-smooth">
         <div className="flex px-4 py-2 gap-2" id="mobile-nav-menu">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              id={`mob-nav-${item.id}`}
-              onClick={() => setActiveTab(item.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold inline-block shrink-0 transition-all duration-200 ${
-                activeTab === item.id 
-                  ? "bg-indigo-600 text-white shadow-sm" 
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+          {menuItems.map((item) => {
+            const isContactBtn = item.id === "contact";
+            return (
+              <button
+                key={item.id}
+                id={`mob-nav-${item.id}`}
+                onClick={() => setActiveTab(item.id)}
+                className={`px-4 py-1.5 rounded-full text-[13px] sm:text-sm font-extrabold inline-block shrink-0 transition-all duration-200 ${
+                  isContactBtn
+                    ? "bg-amber-400 hover:bg-amber-500 text-slate-950 font-black border border-amber-500/40 shadow-xs px-5"
+                    : activeTab === item.id 
+                      ? "bg-indigo-600 text-white shadow-sm" 
+                      : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </header>

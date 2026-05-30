@@ -17,6 +17,7 @@ import Navigation from "./components/Navigation.tsx";
 import BrandingHero from "./components/BrandingHero.tsx";
 import WallpaperGuide from "./components/WallpaperGuide.tsx";
 import FlooringGuide from "./components/FlooringGuide.tsx";
+import ReviewsGuide from "./components/ReviewsGuide.tsx";
 import EstimateCalculator from "./components/EstimateCalculator.tsx";
 import AiConsultant from "./components/AiConsultant.tsx";
 import InquiryForm from "./components/InquiryForm.tsx";
@@ -273,6 +274,7 @@ export default function App() {
 
         {activeTab === "wallpaper" && <WallpaperGuide />}
         {activeTab === "flooring" && <FlooringGuide />}
+        {activeTab === "reviews" && <ReviewsGuide />}
         
         {activeTab === "calculator" && (
           <EstimateCalculator onInquirySubmitted={handleInquiryAdded} />
