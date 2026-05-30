@@ -25,7 +25,7 @@ import AdminDashboard from "./components/AdminDashboard.tsx";
 import { Inquiry } from "./types.ts";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>("home");
+  const [activeTab, setActiveTab] = useState<string>("calculator");
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
 
@@ -288,24 +288,25 @@ export default function App() {
       </main>
 
       {/* 3. Global Static Sticky 상담 Call banner at the very bottom edge for SEO conversion rate */}
-      <div className="bg-zinc-900/95 text-white py-3.5 px-4 sm:px-6 border-t border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-          <div className="text-center sm:text-left">
-            <span className="text-[10px] sm:text-xs text-amber-400 font-bold tracking-wider uppercase block">도배장판닷컴 (dobaejangpan.com) 전국 24시간 실시간 예약 대기</span>
-            <span className="text-xs text-slate-300">지금 신청하면 <strong>인근 전담 지부장 출장 견적 & 샘플 배달 책자가 전액 무상!</strong></span>
+      <div className="bg-zinc-900/95 text-white py-4 px-4 sm:px-6 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+          <div className="text-center md:text-left">
+            <span className="text-sm sm:text-base md:text-lg text-amber-400 font-black tracking-wider block">
+              도배장판닷컴 (dobaejangpan.com) 전국 24시간 실시간 예약 대기
+            </span>
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
+          <div className="flex items-center gap-3 w-full md:w-auto justify-center">
             <button 
               onClick={() => handleTabChange("calculator")}
-              className="bg-indigo-600 hover:bg-indigo-700 font-sans font-extrabold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors"
+              className="bg-indigo-600 hover:bg-indigo-700 font-sans font-black text-base sm:text-lg md:text-xl px-7 py-3 md:py-3.5 rounded-2xl cursor-pointer transition-all shadow-lg active:scale-95 whitespace-nowrap animate-bounce-subtle"
             >
               실시간 자동 견적기
             </button>
             <button 
               onClick={() => handleTabChange("contact")}
-              className="bg-emerald-600 hover:bg-emerald-700 font-sans font-extrabold text-xs px-4 py-2 rounded-lg cursor-pointer transition-colors flex items-center gap-1"
+              className="bg-emerald-600 hover:bg-emerald-700 font-sans font-black text-base sm:text-lg md:text-xl px-7 py-3 md:py-3.5 rounded-2xl cursor-pointer transition-all shadow-lg active:scale-95 flex items-center gap-1.5 whitespace-nowrap"
             >
-              <PhoneCall className="w-3.5 h-3.5" />
+              <PhoneCall className="w-5 h-5" />
               <span>간편 상담 요청</span>
             </button>
           </div>

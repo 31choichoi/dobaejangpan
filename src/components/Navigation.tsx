@@ -35,7 +35,7 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
         <div className="flex justify-between items-center h-16">
           {/* Logo Brand */}
           <div 
-            onClick={() => setActiveTab("home")} 
+            onClick={() => setActiveTab("calculator")} 
             className="flex items-center gap-2 cursor-pointer group"
             id="nav-logo"
           >

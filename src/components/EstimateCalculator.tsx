@@ -19,18 +19,18 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitMessage, setSubmitMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Constants for pricing calculation (Unit rates are in KRW)
+  // Constants for pricing calculation (Unit rates are in KRW - Updated to May 2026 market value)
   const WALLPAPER_RATES: Record<string, number> = {
     none: 0,
-    paper: 16000, // 16,000 KRW per pyeong
-    silk: 29000,  // 29,000 KRW per pyeong
+    paper: 19000, // 19,000 KRW per pyeong
+    silk: 34000,  // 34,000 KRW per pyeong
   };
 
   const FLOORING_RATES: Record<string, number> = {
     none: 0,
-    basic: 20000,   // 20,000 KRW per pyeong
-    thick: 33000,   // 33,000 KRW per pyeong
-    decotile: 38000 // 38,000 KRW per pyeong
+    basic: 24000,   // 24,000 KRW per pyeong
+    thick: 38000,   // 38,000 KRW per pyeong
+    decotile: 44000 // 44,000 KRW per pyeong
   };
 
   // Live calculation values
@@ -43,25 +43,29 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
     const floorMaterialCost = floorRate * size;
     const totalMaterialCost = wallMaterialCost + floorMaterialCost;
 
-    // Labor Calculation (Estimated workers based on scale)
-    // Generally 1 dobae worker can do ~12 pyeongs of paper, or ~8 pyeongs of silk.
-    // For flooring, 1 worker can cover up to ~25 pyeongs a day.
-    let dobaeWorkers = 0;
-    if (wallpaper !== "none") {
-      const divisor = wallpaper === "silk" ? 8 : 12;
-      dobaeWorkers = Math.max(1, Math.ceil(size / divisor));
+    // Discrete Labor units (품수) according to realistic construction standards
+    let smoothDobae = 0;
+    if (wallpaper === "silk") {
+      smoothDobae = 1.5 + (size * 0.15);
+    } else if (wallpaper === "paper") {
+      smoothDobae = 0.8 + (size * 0.10);
     }
 
-    let flooringWorkers = 0;
+    let smoothFlooring = 0;
     if (flooring !== "none") {
-      flooringWorkers = Math.max(1, Math.ceil(size / 22));
+      smoothFlooring = 0.5 + (size * 0.06);
     }
 
-    const DAILY_LABOR_RATE = 260000; // 260k KRW per expert
-    const laborCost = (dobaeWorkers + flooringWorkers) * DAILY_LABOR_RATE;
+    const dobaeWorkers = smoothDobae > 0 ? Math.max(1, Math.round(smoothDobae)) : 0;
+    const flooringWorkers = smoothFlooring > 0 ? Math.max(1, Math.round(smoothFlooring)) : 0;
 
-    // Supplementary materials (glue, thread, primer - estimated around 10% of materials)
-    const subMaterialCost = totalMaterialCost > 0 ? Math.round(totalMaterialCost * 0.12) : 0;
+    const DAILY_LABOR_RATE = 280000; // 280k KRW per expert (May 2026 market average)
+    
+    // Smooth labor pricing based on continuous curve to eliminate sudden cliff-jumps
+    const laborCost = Math.round((smoothDobae + smoothFlooring) * DAILY_LABOR_RATE);
+
+    // Supplementary materials (glue, thread, primer - estimated around 18% of materials)
+    const subMaterialCost = totalMaterialCost > 0 ? Math.round(totalMaterialCost * 0.18) : 0;
 
     // Direct discount for combining both dobae and flooring
     const comboDiscount = (wallpaper !== "none" && flooring !== "none") 
@@ -257,14 +261,27 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
 
               {/* Construction Size (Pyeong) */}
               <div>
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-xs sm:text-sm font-bold text-slate-700">
-                    2. 시공 전체 면적 (분양/실크 면적 기준 평수)
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs sm:text-sm font-bold text-slate-700 flex items-center gap-1">
+                    <span>2. 시공 전체 실제 면적 (실평수 / 전용면적 기준)</span>
+                    <span className="bg-rose-100 text-rose-700 text-[10px] px-1.5 py-0.5 rounded-sm font-extrabold animate-pulse">실평수 필수 입력!</span>
                   </label>
                   <span className="bg-indigo-50 text-indigo-700 font-sans font-black text-sm px-3 py-1 rounded-lg border border-indigo-100">
-                    {size} 평 <span className="text-xs text-slate-400 font-normal">({(size * 3.3).toFixed(1)} m²)</span>
+                    실 {size} 평 <span className="text-xs text-slate-400 font-normal">({(size * 3.3).toFixed(1)} m²)</span>
                   </span>
                 </div>
+                
+                {/* Visual guidance box */}
+                <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 mb-3 text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                  <p className="font-bold text-indigo-900 mb-1 flex items-center gap-1">
+                    💡 분양평수(공급면적)가 아닌, 실제 거주하시는 <strong>'실평수(전용면적)'</strong>를 입력하셔야 가견적이 완벽하게 일치합니다!
+                  </p>
+                  <p className="text-slate-500">
+                    · 아파트 <strong>32평형 또는 34평형</strong> (공급면적) ➔ 실제 거주는 보통 <strong>실평수 24~25평</strong>으로 지정<br />
+                    · 아파트 <strong>24평형 또는 25평형</strong> (공급면적) ➔ 실제 거주는 보통 <strong>실평수 18평</strong>으로 지정
+                  </p>
+                </div>
+
                 <input
                   type="range"
                   min="5"
@@ -275,13 +292,13 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
                   className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                   id="calc-range-size"
                 />
-                <div className="flex justify-between text-[11px] text-slate-400 font-medium px-1 mt-1">
-                  <span>5평(원룸)</span>
-                  <span>18평(소형형)</span>
-                  <span>24평(인기아파트)</span>
-                  <span>32평(국민평형)</span>
-                  <span>45평(대형)</span>
-                  <span>65평+</span>
+                <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-medium px-1 mt-1">
+                  <span>실 5평(원룸)</span>
+                  <span>실 18평(공급 24평형)</span>
+                  <span>실 24평(공급 32평형)</span>
+                  <span>실 34평(공급 45평형)</span>
+                  <span>실 45평(공급 55평형)</span>
+                  <span>실 65평+</span>
                 </div>
               </div>
 
@@ -396,7 +413,7 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
                 {/* Expert Labor costs */}
                 <div className="flex justify-between items-center text-slate-300 border-b border-indigo-850/40 pb-3">
                   <span>
-                    시공 기술 인건비 ({estimates.workersTotal}인 기준)
+                    시공 기술 인건비 ({estimates.workersTotal}품 기준)
                   </span>
                   <span className="font-mono text-white font-semibold">
                     {estimates.laborCost.toLocaleString()} 원
