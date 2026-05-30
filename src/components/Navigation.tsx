@@ -8,10 +8,10 @@ interface NavigationProps {
 
 export default function Navigation({ activeTab, setActiveTab }: NavigationProps) {
   const menuItems = [
-    { id: "home", label: "홈 / 도배장판닷컴 소개" },
-    { id: "wallpaper", label: "전문 도배 가이드" },
-    { id: "flooring", label: "친환경 장판 가이드" },
-    { id: "calculator", label: "실시간 투명 견적기" },
+    { id: "home", label: "이용안내" },
+    { id: "wallpaper", label: "도배정보" },
+    { id: "flooring", label: "장판정보" },
+    { id: "calculator", label: "실시간 견적" },
     { id: "ai-consult", label: "AI 맞춤 스타일 컨설팅" },
     { id: "contact", label: "실시간 상담 문의" },
   ];
@@ -19,7 +19,7 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
       {/* Top micro banner for search keywords indexation */}
-      <div className="bg-slate-900 text-white text-[11px] py-1 px-4 text-center sm:flex sm:justify-between items-center text-xs font-mono">
+      <div style={{ display: "none" }} className="bg-slate-900 text-white text-[11px] py-1 px-4 text-center sm:flex sm:justify-between items-center text-xs font-mono">
         <div className="truncate">
           <span className="bg-red-500 text-white px-1.5 py-0.5 rounded-sm text-[10px] uppercase font-bold mr-2">SEO KEYWORD</span>
           #도배 #장판 #실크벽지 #장판단가 #아파트도배장판 추천 시공 1위 도배장판닷컴
@@ -72,12 +72,12 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
           {/* Quick Call Action Button */}
           <div className="flex items-center gap-2">
             <a 
-              href="tel:1588-0000" 
+              href="tel:1844-1814" 
               className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold px-3 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-200"
               id="btn-quick-call"
             >
               <PhoneCall className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">무료전화견적</span> <span className="font-mono">1588-0000</span>
+              <span className="hidden sm:inline">주문/상담</span> <span className="font-mono">1844-1814</span>
             </a>
           </div>
         </div>

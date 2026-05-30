@@ -50,25 +50,25 @@ export default function WallpaperGuide() {
         </div>
 
         {/* Comparison Table / Responsive Cards */}
-        <div className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-xs mb-10">
-          <div className="p-4 sm:p-6 bg-slate-900 text-white flex justify-between items-center sm:grid sm:grid-cols-12 sm:gap-4 md:text-center font-bold">
-            <div className="col-span-3 text-left">핵심 비교 항목</div>
-            <div className="col-span-4.5 text-indigo-300">프리미엄 실크벽지 (PVC)</div>
-            <div className="col-span-4.5 text-amber-300">내추럴 소형/광폭 합지벽지</div>
+        <div className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden shadow-xs mb-10 w-full">
+          <div className="p-4 sm:p-6 bg-slate-900 text-white grid grid-cols-1 sm:grid-cols-12 gap-4 text-left sm:text-left font-bold">
+            <div className="col-span-12 sm:col-span-3">핵심 비교 항목</div>
+            <div className="col-span-12 sm:col-span-4 text-indigo-350">프리미엄 실크벽지 (PVC 코팅)</div>
+            <div className="col-span-12 sm:col-span-5 text-amber-350">내추럴 소형/광폭 합지벽지</div>
           </div>
 
           <div className="divide-y divide-slate-200">
             {comparisons.map((item, idx) => (
-              <div key={idx} className="p-4 sm:p-6 sm:grid sm:grid-cols-12 sm:gap-4 text-slate-700 hover:bg-slate-100/50 transition-colors">
-                <div className="col-span-3 font-bold text-slate-900 mb-2 sm:mb-0 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5">
+              <div key={idx} className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-12 gap-4 text-slate-700 hover:bg-slate-100/50 transition-colors">
+                <div className="col-span-12 sm:col-span-3 font-bold text-slate-900 mb-2 sm:mb-0 text-xs sm:text-sm uppercase tracking-wider flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
                   {item.feature}
                 </div>
-                <div className="col-span-4.5 text-xs sm:text-sm bg-indigo-50/30 p-3 sm:p-0 rounded-lg sm:rounded-none mb-2 sm:mb-0 border border-indigo-100/40 sm:border-0">
+                <div className="col-span-12 sm:col-span-4 text-xs sm:text-sm bg-indigo-50/30 p-3 sm:p-0 rounded-lg sm:rounded-none mb-2 sm:mb-0 border border-indigo-100/40 sm:border-0">
                   <strong className="sm:hidden block text-indigo-700 text-[10px] mb-1 font-bold">실크벽지:</strong>
                   {item.silk}
                 </div>
-                <div className="col-span-4.5 text-xs sm:text-sm bg-amber-50/20 p-3 sm:p-0 rounded-lg sm:rounded-none border border-amber-100/30 sm:border-0">
+                <div className="col-span-12 sm:col-span-5 text-xs sm:text-sm bg-amber-50/20 p-3 sm:p-0 rounded-lg sm:rounded-none border border-amber-100/30 sm:border-0">
                   <strong className="sm:hidden block text-amber-700 text-[10px] mb-1 font-bold">합지벽지:</strong>
                   {item.paper}
                 </div>

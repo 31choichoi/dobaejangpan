@@ -66,7 +66,7 @@ export default function InquiryForm({ inquiries, onInquiryAdded }: InquiryFormPr
       setPhone("");
       setMessage("");
     } catch (err: any) {
-      setFeedback({ type: 'error', text: '상담 요청 등록 중 오류발생. 잠시 후 1588-0000 번으로 직통 전화해 주십시오.' });
+      setFeedback({ type: 'error', text: '상담 요청 등록 중 오류발생. 잠시 후 1844-1814 번으로 직통 전화해 주십시오.' });
     } finally {
       setIsSubmitting(false);
     }

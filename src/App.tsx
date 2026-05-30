@@ -20,11 +20,67 @@ import FlooringGuide from "./components/FlooringGuide.tsx";
 import EstimateCalculator from "./components/EstimateCalculator.tsx";
 import AiConsultant from "./components/AiConsultant.tsx";
 import InquiryForm from "./components/InquiryForm.tsx";
+import AdminDashboard from "./components/AdminDashboard.tsx";
 import { Inquiry } from "./types.ts";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>("home");
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
+
+  const handleUpdateInquiryStatus = (id: number, newStatus: string) => {
+    setInquiries((prev) => 
+      prev.map((inq) => inq.id === id ? { ...inq, status: newStatus } : inq)
+    );
+    try {
+      const stored = localStorage.getItem("local_inquiries");
+      if (stored) {
+        const list = JSON.parse(stored);
+        const updated = list.map((inq: any) => inq.id === id ? { ...inq, status: newStatus } : inq);
+        localStorage.setItem("local_inquiries", JSON.stringify(updated));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteInquiry = (id: number) => {
+    setInquiries((prev) => prev.filter((inq) => inq.id !== id));
+    try {
+      const stored = localStorage.getItem("local_inquiries");
+      if (stored) {
+        const list = JSON.parse(stored);
+        const filtered = list.filter((inq: any) => inq.id !== id);
+        localStorage.setItem("local_inquiries", JSON.stringify(filtered));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleRefreshInquiries = async () => {
+    try {
+      const res = await fetch("/api/inquiries");
+      if (res.ok) {
+        const srvInqs = await res.json();
+        let localInqs: Inquiry[] = [];
+        const stored = localStorage.getItem("local_inquiries");
+        if (stored) {
+          localInqs = JSON.parse(stored);
+        }
+        const combined = [...localInqs];
+        srvInqs.forEach((srv: Inquiry) => {
+          if (!combined.some((item) => item.phone === srv.phone && item.createdAt === srv.createdAt)) {
+            combined.push(srv);
+          }
+        });
+        combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setInquiries(combined);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Smooth scroll helper when switching tab or navigation item
   const handleTabChange = (tabId: string) => {
@@ -32,18 +88,40 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Fetch inquiries on mount to hydrate the UI from our server.ts CRM database
+  // Fetch inquiries on mount to hydrate the UI from server and localStorage
   useEffect(() => {
     async function loadInquiries() {
+      let serverInqs: Inquiry[] = [];
       try {
         const res = await fetch("/api/inquiries");
         if (res.ok) {
-          const data = await res.json();
-          setInquiries(data);
+          serverInqs = await res.json();
         }
       } catch (err) {
         console.error("실시간 CRM 연락 데이터 로드에 실패했습니다:", err);
       }
+
+      let localInqs: Inquiry[] = [];
+      try {
+        const stored = localStorage.getItem("local_inquiries");
+        if (stored) {
+          localInqs = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.warn("로컬 문의 데이터를 읽는 중 제외 발생:", e);
+      }
+
+      // Combine both lists, ensuring newer items are first and avoiding duplicate items
+      const combined = [...localInqs];
+      serverInqs.forEach((srv) => {
+        if (!combined.some((item) => item.phone === srv.phone && item.createdAt === srv.createdAt)) {
+          combined.push(srv);
+        }
+      });
+
+      // Sort by newer first
+      combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setInquiries(combined);
     }
     loadInquiries();
   }, []);
@@ -208,7 +286,7 @@ export default function App() {
       </main>
 
       {/* 3. Global Static Sticky 상담 Call banner at the very bottom edge for SEO conversion rate */}
-      <div className="sticky bottom-0 z-40 bg-zinc-900/95 backdrop-blur-md text-white py-3.5 px-4 sm:px-6 border-t border-slate-800">
+      <div className="bg-zinc-900/95 text-white py-3.5 px-4 sm:px-6 border-t border-slate-800">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
           <div className="text-center sm:text-left">
             <span className="text-[10px] sm:text-xs text-amber-400 font-bold tracking-wider uppercase block">도배장판닷컴 (dobaejangpan.com) 전국 24시간 실시간 예약 대기</span>
@@ -275,7 +353,7 @@ export default function App() {
             <div className="space-y-1.5 text-[11px] leading-relaxed">
               <p>상호명: 도배장판닷컴 직영 서비스 | 대표자: 최진욱 원장 | 도메인: <strong className="text-indigo-400">dobaejangpan.com</strong></p>
               <p>본사 주소: 서울특별시 강남구 테헤란로 152 7층 직영 시공 종합팀</p>
-              <p>전국 통합 고객 지원부 유선 직통: <strong className="text-white">1588-0000</strong> (전 지역 가견정 무료 상담 가능)</p>
+              <p>전국 통합 고객 지원부 유선 직통: <strong className="text-white">1844-1814</strong> (주문/상담 무료 지원 가능)</p>
               <p>사업자등록 정보: 104-86-12480 | 통신판매신고번호: 제 2026-서울강남-1204호</p>
             </div>
           </div>
@@ -284,13 +362,27 @@ export default function App() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-800 text-[10px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p>&copy; 2026 도배장판닷컴 All Rights Reserved. Designed for premium home modifications securely inside Korea.</p>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4 justify-center">
             <a href="#section-contact-inquiries" onClick={() => handleTabChange("contact")} className="hover:underline">이용약관</a>
             <a href="#section-contact-inquiries" onClick={() => handleTabChange("contact")} className="hover:underline">개인정보처리방침</a>
             <a href="#section-contact-inquiries" onClick={() => handleTabChange("contact")} className="hover:underline text-indigo-400">무료 실측 실적</a>
+            <button onClick={() => setIsAdminOpen(true)} className="hover:underline text-amber-500 font-extrabold cursor-pointer flex items-center gap-1">
+              <span>🛠️ 관리자 전산 (CRM)</span>
+            </button>
           </div>
         </div>
       </footer>
+
+      {/* 5. Secure Admin CRM Dashboard Overlay Modal */}
+      {isAdminOpen && (
+        <AdminDashboard 
+          inquiries={inquiries}
+          onUpdateStatus={handleUpdateInquiryStatus}
+          onDeleteInquiry={handleDeleteInquiry}
+          onRefresh={handleRefreshInquiries}
+          onClose={() => setIsAdminOpen(false)}
+        />
+      )}
 
     </div>
   );
