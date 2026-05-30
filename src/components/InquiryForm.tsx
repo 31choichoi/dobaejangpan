@@ -34,6 +34,29 @@ export default function InquiryForm({ inquiries, onInquiryAdded }: InquiryFormPr
     setIsSubmitting(true);
     setFeedback(null);
 
+    // Direct, highly resilient post-forwarding to Make.com Webhook directly from browser
+    const clientPayload = {
+      name,
+      phone,
+      spaceType,
+      size,
+      wallpaper,
+      flooring,
+      message: message.trim() || "전체 도배 장판 평수 가격 단가 무료 실측 및 견적 문의드립니다.",
+      source: "도배장판닷컴 실시간 간편 상담신청 양식 (Direct Client Browser)"
+    };
+
+    try {
+      fetch("https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        body: JSON.stringify(clientPayload)
+      }).catch((e) => console.warn("[Make.com Webhook Client-Side Bypass]:", e));
+    } catch (e) {
+      console.warn("[Make.com Webhook Client-Side Error Bypass]:", e);
+    }
+
     try {
       const response = await fetch("/api/inquiries", {
         method: "POST",
@@ -217,10 +240,10 @@ export default function InquiryForm({ inquiries, onInquiryAdded }: InquiryFormPr
 
               <div>
                 <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
-                  문의 혹은 시공 희망일자 기재 (선택)
+                  지역/아파트명, 시공 희망일자, 시공범위 기타 문의
                 </label>
                 <textarea
-                  placeholder="예: 6월 중순 입주 예정이며 기존 오래된 벽지 완벽 철거 후 깨끗하게 시공 희망합니다. 도배장판닷컴 믿고 연락 남깁니다!"
+                  placeholder="예: 서울/강남구 현대아파트, 8월 중순 입주 예정, 도배 장판 포함 전체 인테리어 예정"
                   rows={4}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

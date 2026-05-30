@@ -61,12 +61,12 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
                   key={item.id}
                   id={`btn-nav-${item.id}`}
                   onClick={() => setActiveTab(item.id)}
-                  className={`px-3.5 py-2 bg-transparent rounded-lg text-base font-extrabold transition-all duration-200 cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-lg text-base font-extrabold cursor-pointer transform transition-all duration-300 hover:scale-135 origin-center ${
                     isContactBtn
-                      ? "bg-amber-400 hover:bg-amber-500 text-slate-950 font-black shadow-xs px-5 py-2 border border-amber-500/30 ml-2 animate-bounce-subtle"
+                      ? "bg-orange-500 hover:bg-orange-600 text-white font-black shadow-md px-5 py-2 border border-orange-600/30 ml-2 hover:shadow-lg"
                       : activeTab === item.id 
                         ? "text-indigo-600 bg-indigo-50/80" 
-                        : "text-slate-700 hover:text-indigo-600 hover:bg-slate-100/90"
+                        : "text-slate-700 bg-transparent hover:text-indigo-600 hover:bg-slate-100/90"
                   }`}
                 >
                   {item.label}
@@ -99,9 +99,9 @@ export default function Navigation({ activeTab, setActiveTab }: NavigationProps)
                 key={item.id}
                 id={`mob-nav-${item.id}`}
                 onClick={() => setActiveTab(item.id)}
-                className={`px-4 py-1.5 rounded-full text-[13px] sm:text-sm font-extrabold inline-block shrink-0 transition-all duration-200 ${
+                className={`px-4 py-1.5 rounded-full text-[13px] sm:text-sm font-extrabold inline-block shrink-0 transform transition-all duration-200 cursor-pointer ${
                   isContactBtn
-                    ? "bg-amber-400 hover:bg-amber-500 text-slate-950 font-black border border-amber-500/40 shadow-xs px-5"
+                    ? "bg-orange-500 hover:bg-orange-600 text-white font-black border border-orange-600/30 shadow-sm px-5 hover:scale-110 active:scale-95"
                     : activeTab === item.id 
                       ? "bg-indigo-600 text-white shadow-sm" 
                       : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"

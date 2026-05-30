@@ -103,8 +103,21 @@ export default function EstimateCalculator({ onInquirySubmitted }: EstimateCalcu
       size,
       wallpaper,
       flooring,
-      message: `[즉시 자동 견적 계산기] 예약 신청! 선택유형: ${spaceType} (${size}평) / 도배: ${wallpaper === 'silk' ? '실크벽지' : wallpaper === 'paper' ? '합지벽지' : '선택없음'} / 장판: ${flooring === 'thick' ? '프리미엄 장판' : flooring === 'basic' ? '실속장판' : flooring === 'decotile' ? '데코타일' : '선택없음'}. 자동 산출된 총가견적: 약 ${estimates.grandTotal.toLocaleString()}원 입니다.`
+      message: `[즉시 자동 견적 계산기] 예약 신청! 선택유형: ${spaceType} (${size}평) / 도배: ${wallpaper === 'silk' ? '실크벽지' : wallpaper === 'paper' ? '합지벽지' : '선택없음'} / 장판: ${flooring === 'thick' ? '프리미엄 장판' : flooring === 'basic' ? '실속장판' : flooring === 'decotile' ? '데코타일' : '선택없음'}. 자동 산출된 총가견적: 약 ${estimates.grandTotal.toLocaleString()}원 입니다.`,
+      source: "도배장판닷컴 실시간 자동 견적 계산기 양식 (Direct Client Browser)"
     };
+
+    // Direct, highly resilient post-forwarding to Make.com Webhook directly from browser
+    try {
+      fetch("https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        body: JSON.stringify(payload)
+      }).catch((e) => console.warn("[Make.com Webhook Calculator Client-Side Bypass]:", e));
+    } catch (e) {
+      console.warn("[Make.com Webhook Calculator Client-Side Error Bypass]:", e);
+    }
 
     try {
       const response = await fetch("/api/inquiries", {
