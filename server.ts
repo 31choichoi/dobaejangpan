@@ -93,6 +93,18 @@ async function startServer() {
       message: message || "상담 및 빠른 가견적 원해요."
     };
     inquiries.unshift(newInquiry);
+
+    // Forward asynchronously to Make.com Webhook
+    fetch("https://hook.eu1.make.com/aspj9xwieg4jsvi4ilm1ploqxmei38ml", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newInquiry)
+    }).then((response) => {
+      console.log(`[Make.com Webhook] Forwarded inquiry successfully. Status: ${response.status}`);
+    }).catch((err) => {
+      console.error("[Make.com Webhook] Forwarding failed:", err.message);
+    });
+
     res.status(201).json(newInquiry);
   });
 

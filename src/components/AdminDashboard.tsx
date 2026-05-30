@@ -249,9 +249,9 @@ export default function AdminDashboard({
                   </div>
 
                   <div>
-                    <h5 className="font-bold text-white mb-1">2. 구글 스프레드시트 or 카카오 알림톡 (Webhook)</h5>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      <strong>Make.com</strong>, <strong>Zapier</strong> 같은 타사 자동화 툴이나, <strong>솔라피(Solapi)</strong>를 사용해 접수 즉시 휴대폰으로 카카오톡 전산 카드가 오도록 Webhook trigger 주소로 중계 데이터 패킷을 전달할 수도 있습니다.
+                    <h5 className="font-bold text-yellow-300 mb-1">2. ✅ Make.com 연동 완료! (Webhook 작동 중)</h5>
+                    <p className="text-[11px] text-slate-300 leading-relaxed bg-slate-800/60 p-2 rounded-lg border border-slate-700/50">
+                      지정해주신 Make.com 유효 후크 주소(<span className="text-[10px] text-indigo-300 font-mono">https://hook.eu1.make.com/...</span>)로의 실시간 연동 등록이 완료되었습니다. 고객 상담 접수 즉시 Make.com 시나리오가 즉시 활성화됩니다!
                     </p>
                   </div>
 

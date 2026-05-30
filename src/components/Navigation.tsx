@@ -8,12 +8,12 @@ interface NavigationProps {
 
 export default function Navigation({ activeTab, setActiveTab }: NavigationProps) {
   const menuItems = [
-    { id: "home", label: "이용안내" },
+    { id: "calculator", label: "실시간 견적" },
     { id: "wallpaper", label: "도배정보" },
     { id: "flooring", label: "장판정보" },
-    { id: "calculator", label: "실시간 견적" },
     { id: "ai-consult", label: "AI 맞춤 스타일 컨설팅" },
     { id: "contact", label: "실시간 상담 문의" },
+    { id: "home", label: "이용안내" },
   ];
 
   return (
